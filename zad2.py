@@ -1,5 +1,11 @@
+from __future__ import print_function
+import sys
 import random
 from time import perf_counter
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def get_hood(x):
@@ -41,11 +47,12 @@ def rand_start(n):
 
 
 def swap_nodes(path=[], idxs=[]):
-    tmp = path[idxs[0]]
-    path[idxs[0]] = path[idxs[1]]
-    path[idxs[1]] = tmp
+    tmp1 = path[:]
+    tmp = tmp1[idxs[0]]
+    tmp1[idxs[0]] = tmp1[idxs[1]]
+    tmp1[idxs[1]] = tmp
 
-    return path
+    return tmp1
 
 
 def calc_dist(path=[], dist_table=[]):
@@ -68,10 +75,10 @@ def search_tsp(curr_path, dist_table, time):
 
     while time - (perf_counter() - t_start) > 0:
         for swap in get_hood(len(curr_path)):
-            print("curr path and its distance: ", curr_path, calc_dist(curr_path, dist_table))
             if swap_nodes(curr_path, swap) not in tabu:
+
                 if calc_dist(swap_nodes(curr_path, swap), dist_table) < calc_dist(curr_path, dist_table):
-                    best_candidate = swap_nodes(curr_path, swap)
+                    best_candidate = swap_nodes(curr_path, swap)[::]
 
         if best_candidate == curr_path:
             curr_path = rand_start(len(curr_path))
@@ -83,21 +90,17 @@ def search_tsp(curr_path, dist_table, time):
             tabu.pop(0)
 
         if calc_dist(best_candidate, dist_table) < calc_dist(best_path, dist_table):
-            best_path = best_candidate
+            best_path = best_candidate[::]
 
     return best_path
 
 
 my_dist = get_dist()
 my_time = int(my_dist.pop(0))
-
 my_path = rand_start(len(my_dist))
-
 my_hood = get_hood(len(my_path))
 
-print("best found: ", calc_dist(search_tsp(my_path, my_dist, my_time), my_dist))
+my_best = search_tsp(my_path, my_dist, my_time)
 
-print("distances: ", my_dist)
-print("my random path: ", my_path)
-print("indx fo swap: ", my_hood)
-
+print(calc_dist(my_best, my_dist))
+eprint(my_best)
