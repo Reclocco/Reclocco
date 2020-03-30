@@ -65,19 +65,32 @@ def search_lab(my_map):
 
     my_path = gen_seq()
     print(my_path)
-    my_hood = []
-    best = my_path
-    finished = 1
+    best = []
+    finished = 0
+    walked = []
+
+    curr_pos = wheres_waldo(my_map)
+    my_hood = get_hood(my_path)
 
     t_start = perf_counter()
     while time - (perf_counter() - t_start) > 0:
-        walked = []
-        my_hood = get_hood(my_path)
+
         if finished == 1:
             curr_pos = wheres_waldo(my_map)
+            print(walked)
+            try:
+                if len(walked) < len(best[0]):
+                    best[0] = walked[::]
+            except IndexError:
+                best.append(walked[::])
+
+            walked.clear()
+            my_hood = get_hood(my_path)
+
             finished = 0
         else:
             my_path = randomize(my_path)
+            my_hood = [my_path]
 
         idx = 0
         print(curr_pos)
@@ -110,6 +123,9 @@ def search_lab(my_map):
                 print('finished')
                 break
 
+    print(walked)
+    return best[0]
+
 
 def get_hood(my_path):
     my_hood = []
@@ -123,7 +139,7 @@ def get_hood(my_path):
 
 
 le_inputo = get_input()
-search_lab(le_inputo)
+print("best: ", search_lab(le_inputo))
 
 # print(le_inputo)
 # print(gen_seq())
