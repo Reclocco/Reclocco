@@ -64,64 +64,70 @@ def search_lab(my_map):
     my_map.pop(0)
 
     my_path = gen_seq()
-    print(my_path)
+    print('1st path: ', my_path)
     best = []
+    best_cand = []
     finished = 0
     walked = []
 
     curr_pos = wheres_waldo(my_map)
-    my_hood = get_hood(my_path)
+    my_hood = [my_path]
 
     t_start = perf_counter()
     while time - (perf_counter() - t_start) > 0:
+        for neighbor in my_hood:
+            if finished == 1:
+                curr_pos = wheres_waldo(my_map)
+                print('successful: ', walked)
 
-        if finished == 1:
-            curr_pos = wheres_waldo(my_map)
-            print(walked)
-            try:
-                if len(walked) < len(best[0]):
-                    best[0] = walked[::]
-            except IndexError:
-                best.append(walked[::])
+                walked.clear()
 
-            walked.clear()
-            my_hood = get_hood(my_path)
+                finished = 0
+            else:
+                my_path = randomize(my_path)
 
-            finished = 0
-        else:
-            my_path = randomize(my_path)
-            my_hood = [my_path]
+            print(curr_pos)
+            print(neighbor)
+            for idx in range(len(neighbor)):
+                if neighbor[idx] == 0:  # RIGHT
+                    if my_map[curr_pos[0]][curr_pos[1] + 1] != 1:
+                        curr_pos[1] += 1
+                        walked.append(0)
 
-        idx = 0
-        print(curr_pos)
+                if neighbor[idx] == 1:  # LEFT
+                    if my_map[curr_pos[0]][curr_pos[1] - 1] != 1:
+                        curr_pos[1] -= 1
+                        walked.append(1)
 
-        for _ in range(len(my_path)):
-            if my_path[idx % len(my_path)] == 0:  # RIGHT
-                if my_map[curr_pos[0]][curr_pos[1] + 1] != 1:
-                    curr_pos[1] += 1
-                    walked.append(0)
+                if neighbor[idx] == 2:  # DOWN
+                    if my_map[curr_pos[0] + 1][curr_pos[1]] != 1:
+                        curr_pos[0] += 1
+                        walked.append(2)
 
-            if my_path[idx % len(my_path)] == 1:  # LEFT
-                if my_map[curr_pos[0]][curr_pos[1] - 1] != 1:
-                    curr_pos[1] -= 1
-                    walked.append(1)
+                if neighbor[idx] == 3:  # UP
+                    if my_map[curr_pos[0] - 1][curr_pos[1]] != 1:
+                        curr_pos[0] -= 1
+                        walked.append(3)
 
-            if my_path[idx % len(my_path)] == 2:  # DOWN
-                if my_map[curr_pos[0] + 1][curr_pos[1]] != 1:
-                    curr_pos[0] += 1
-                    walked.append(2)
+                if my_map[curr_pos[0]][curr_pos[1]] == 8:
+                    print('finished')
+                    finished = 1
+                    try:
+                        if len(walked) < len(best[0]):
+                            best[0] = walked[::]
+                    except IndexError:
+                        best.append(walked[::])
 
-            if my_path[idx % len(my_path)] == 3:  #UP
-                if my_map[curr_pos[0] - 1][curr_pos[1]] != 1:
-                    curr_pos[0] -= 1
-                    walked.append(3)
+                    try:
+                        if len(walked) < len(best_cand[0]):
+                            best_cand[0] = walked[::]
+                    except IndexError:
+                        best_cand.append(walked[::])
 
-            idx += 1
-            # print(curr_pos)
-            if my_map[curr_pos[0]][curr_pos[1]] == 8:
-                finished = 1
-                print('finished')
-                break
+                    my_path = best_cand[0]
+                    my_hood = get_hood(my_path)
+
+                    break
 
     print(walked)
     return best[0]
