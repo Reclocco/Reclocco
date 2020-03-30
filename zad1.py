@@ -10,9 +10,9 @@ def randomize(x):
     idx = random.randint(0, 3)
     value = random.randint(-1, 1)
     if value <= 0:
-        x[idx] += 10
+        x[idx] += 5
     else:
-        x[idx] -= 10
+        x[idx] -= 5
 
     return x
 
@@ -41,7 +41,7 @@ def search_cat(act_sol, delta, hood):
             if happy_cat(element) < happy_cat(act_sol):
                 act_sol = element
 
-        if prev_best == act_sol:
+        if [prev_best[0]-1, prev_best[1]+1, prev_best[2]+1, prev_best[3]+1] == act_sol:
             local_opt.append(act_sol)
             counter += 1
 
@@ -64,6 +64,9 @@ def search_wank(act_sol, delta, hood):
     local_opt = []
     t_start = perf_counter()
     counter = 0
+    how_many = 0
+
+    print(len(get_hood(act_sol, delta, hood)))
 
     while int(sys.argv[1]) - (perf_counter() - t_start) > 0:
         prev_best = act_sol
@@ -71,7 +74,7 @@ def search_wank(act_sol, delta, hood):
             if griewank(element) < griewank(act_sol):
                 act_sol = element
 
-        if prev_best == act_sol:
+        if [prev_best[0]-1, prev_best[1]+1, prev_best[2]+1, prev_best[3]+1] == act_sol:
             local_opt.append(act_sol)
             counter += 1
 
@@ -121,12 +124,11 @@ def get_hood(x=None, delta_fun=0.2, hood_fun=0.6):
 
 
 def restart():
-    return [random.randint(-1000, 1000), random.randint(-1000, 1000),
-            random.randint(-1000, 1000), random.randint(-1000, 1000)]
+    return [random.randint(-50, 50), random.randint(-50, 50),
+            random.randint(-50, 50), random.randint(-50, 50)]
 
 
 start = restart()
-
 da_hood = 0.6
 da_delta = 0.2
 

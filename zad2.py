@@ -1,14 +1,12 @@
 import random
+from time import perf_counter
 
 
-def get_hood(x=None):
-    if x is None:
-        x = []
-
+def get_hood(x):
     hood = []
 
-    for i in range(len(x) - 1):
-        for j in range(len(x) - 1 - i):
+    for i in range(x - 1):
+        for j in range(x - 1 - i):
             hood.append([i, i + j + 1])
 
     return hood
@@ -18,7 +16,7 @@ def get_dist():
     dist_arr = []
 
     line = input().split()
-    dist_arr.append([int(line[0])])
+    dist_arr.append(int(line[0]))
 
     for i in range(int(line[1])):
         line = input().split()
@@ -35,21 +33,71 @@ def rand_start(n):
         nums.append(i)
 
     for i in range(n):
-        idx = round(random.randint(0, n-i-1))
+        idx = round(random.randint(0, n - i - 1))
         rand_path.append(nums[idx])
         nums.pop(idx)
 
     return rand_path
 
 
-dist = get_dist()
-time = dist.pop(0)
-print("distances: ", dist)
+def swap_nodes(path=[], idxs=[]):
+    tmp = path[idxs[0]]
+    path[idxs[0]] = path[idxs[1]]
+    path[idxs[1]] = tmp
 
-my_path = rand_start(len(dist))
+    return path
+
+
+def calc_dist(path=[], dist_table=[]):
+    dist = 0
+
+    for i in range(len(path) - 1):
+        dist += dist_table[path[i]][path[i + 1]]
+
+    dist += dist_table[path[-1]][path[0]]
+
+    return dist
+
+
+def search_tsp(curr_path, dist_table, time):
+    best_candidate = curr_path
+    best_path = curr_path
+    tabu = []
+    max_tabu = 50
+    t_start = perf_counter()
+
+    while time - (perf_counter() - t_start) > 0:
+        for swap in get_hood(len(curr_path)):
+            print("curr path and its distance: ", curr_path, calc_dist(curr_path, dist_table))
+            if swap_nodes(curr_path, swap) not in tabu:
+                if calc_dist(swap_nodes(curr_path, swap), dist_table) < calc_dist(curr_path, dist_table):
+                    best_candidate = swap_nodes(curr_path, swap)
+
+        if best_candidate == curr_path:
+            curr_path = rand_start(len(curr_path))
+        else:
+            curr_path = best_candidate
+
+        tabu += best_candidate
+        if len(tabu) > max_tabu:
+            tabu.pop(0)
+
+        if calc_dist(best_candidate, dist_table) < calc_dist(best_path, dist_table):
+            best_path = best_candidate
+
+    return best_path
+
+
+my_dist = get_dist()
+my_time = int(my_dist.pop(0))
+
+my_path = rand_start(len(my_dist))
+
+my_hood = get_hood(len(my_path))
+
+print("best found: ", calc_dist(search_tsp(my_path, my_dist, my_time), my_dist))
+
+print("distances: ", my_dist)
 print("my random path: ", my_path)
-
-my_hood = get_hood(my_path)
 print("indx fo swap: ", my_hood)
-
 
